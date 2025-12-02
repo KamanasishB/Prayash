@@ -1,403 +1,338 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Prayash | Special Days</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --bg: #F0F2F5;
-            --card-bg: #FFFFFF;
-            --text-main: #2D3436;
-            --text-light: #636E72;
-            --male-color: #e3f2fd;
-            --female-color: #fce4ec;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Prayash Calendar — Friends (Expandable)</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F0F2F5; --card:#fff; --accent:#6C63FF; --muted:#8a9296;
+    --male:#e8f3ff; --female:#fff0f6;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'Outfit',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background:var(--bg); color:#222; padding:28px;
+  }
+  header{ text-align:center; margin-bottom:22px}
+  h1{font-size:1.9rem; margin:0; font-weight:600}
+  p.lead{margin:6px 0 0;color:var(--muted)}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+  .controls{display:flex;gap:12px;justify-content:center;margin:18px 0 26px;flex-wrap:wrap}
+  .search{padding:10px 14px;border-radius:999px;border:1px solid #ddd;background:white;min-width:220px}
+  .btn{padding:10px 14px;border-radius:999px;border:1px solid #ddd;background:white;cursor:pointer}
+  .btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            padding: 20px;
-        }
+  /* Grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;max-width:1200px;margin:0 auto}
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-        }
+  /* Friend card */
+  .card{
+    background:var(--card); border-radius:16px; padding:18px; box-shadow:0 10px 28px rgba(18,20,26,0.06);
+    position:relative; overflow:visible; transition:transform .18s ease;
+  }
+  .card:hover{ transform:translateY(-6px) }
+  .avatar{width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid var(--card);box-shadow:0 6px 18px rgba(0,0,0,0.08); display:block;margin:0 auto}
+  .name{margin-top:12px;text-align:center;font-weight:600}
+  .meta{ text-align:center;color:var(--muted); font-size:0.92rem;margin-top:6px }
 
-        h1 { font-weight: 600; color: var(--text-main); margin-bottom: 10px; }
-        p { color: var(--text-light); }
+  /* expand toggle */
+  .expand-toggle{ display:flex; justify-content:center;margin-top:12px }
+  .toggle-btn{ background:transparent;border:1px solid #eee;padding:8px 12px;border-radius:999px;cursor:pointer }
+  .toggle-btn:focus{outline:2px solid rgba(108,99,255,0.18)}
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-            position: relative; /* so autocomplete can be positioned nicely */
-        }
+  /* Tree container (hidden by default) */
+  .tree-wrap{ max-height:0; overflow:hidden; transition:max-height .36s cubic-bezier(.2,.9,.3,1); margin-top:12px }
+  .tree{ margin-top:8px; padding-left:16px; position:relative }
 
-        select, button {
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            background: white;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            outline: none;
-        }
+  /* vertical line */
+  .tree::before{ content:""; position:absolute; left:10px; top:0; bottom:0; width:2px; background:linear-gradient(#eee,#eee); border-radius:2px; }
 
-        button:hover, select:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06); 
-        }
+  /* node */
+  .node{
+    background: #fff; border-radius:12px; padding:10px 12px; display:flex; gap:12px; align-items:center;
+    box-shadow:0 8px 20px rgba(10,10,10,0.04); margin-bottom:12px; position:relative;
+  }
+  .node:before{ content:""; position:absolute; left:-18px; top:16px; width:18px; height:2px; background:#eee }
+  .node .n-avatar{ width:48px;height:48px;border-radius:50%;object-fit:cover }
+  .node .n-body{ font-size:0.95rem }
+  .node .n-title{ font-weight:600 }
+  .node .n-sub{ color:var(--muted); font-size:0.85rem; margin-top:3px }
 
-        .active-sort {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
+  /* child branch indentation */
+  .children{ padding-left:26px; margin-top:-6px }
 
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  /* parents block for child */
+  .parents-block{ margin-top:8px; font-size:0.85rem; color:var(--muted); background:linear-gradient(90deg,#fafafa,#fff); padding:8px;border-radius:8px; border:1px solid #f0f0f0 }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            transition: transform 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
+  /* small badges */
+  .badge{ font-size:0.75rem; padding:4px 8px; border-radius:999px; background:#f3f3ff; color:var(--accent); display:inline-block; margin-left:8px }
 
-        .card:hover { transform: translateY(-5px); }
-
-        .card.Male { border-bottom: 4px solid #2196F3; }
-        .card.Female { border-bottom: 4px solid #E91E63; }
-
-        .avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 3px solid white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: inline-block;
-        }
-
-        .name { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
-
-        .tag {
-            font-size: 0.75rem;
-            padding: 4px 12px;
-            border-radius: 12px;
-            background: #eee;
-            color: #555;
-            display: inline-block;
-            margin-bottom: 15px;
-            margin-right: 6px;
-        }
-
-        .date-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary);
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
-        .countdown {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-top: 10px;
-        }
-
-        .tag.Friend { background-color: #e8f5e9; color: #2e7d32; }
-        .tag.Spouse { background-color: #fff3e0; color: #ef6c00; }
-        .tag.Child { background-color: #f3e5f5; color: #7b1fa2; }
-        .tag.Anniversary { background-color: #ffece6; color: #d32f2f; }
-
-        /* simple autocomplete styles */
-        .search-wrapper {
-            position: relative;
-        }
-        #autocompleteBox div {
-            font-size: 0.9rem;
-        }
-    </style>
+  /* responsive */
+  @media (max-width:560px){
+    .node .n-avatar{width:40px;height:40px}
+    .avatar{width:72px;height:72px}
+  }
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>Prayash Calendar</h1>
-        <p>Celebrating the special days of our school group & families</p>
-    </header>
+<header>
+  <h1>Prayash Calendar</h1>
+  <p class="lead">Friends list — click a friend to expand spouse & children (tree view)</p>
+</header>
 
-    <div class="controls">
-        <!-- SEARCH BAR + AUTOCOMPLETE (intellisense) -->
-        <div class="search-wrapper">
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="Search name..." 
-                oninput="handleSearch()" 
-                autocomplete="off"
-                style="padding:10px 20px; border-radius:20px; border:1px solid #ddd; width:220px;"
-            >
-            <div id="autocompleteBox" 
-                style="position:absolute; top:42px; left:0; background:white; border:1px solid #ddd; width:220px; display:none; z-index:100; max-height:200px; overflow-y:auto; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.06);">
-            </div>
+<div class="controls" aria-hidden="false">
+  <input id="searchInput" class="search" placeholder="Search friends..." oninput="onSearch()" aria-label="Search friends">
+  <button class="btn" id="clearBtn" onclick="clearSearch()">Clear</button>
+</div>
+
+<main>
+  <div class="grid" id="friendsGrid" aria-live="polite"></div>
+</main>
+
+<script>
+/* ---------------------
+   Data (relationships)
+   --------------------- */
+const people = [
+  // Friends (primary shown on first page)
+  { name: "Kamanasish Bhattacharjee", type:["Friend"], gender:"Male", date:"11-08", photo:"photos/Kamanasish_Bhattacharjee.jpeg", spouseName: "Debosmita Bhattacharjee" },
+
+  // Debopom and Dipanwita are both friends AND spouses of each other; their child is Debodhriti
+  { name: "Debopom Debroy", type:["Friend"], gender:"Male", date:"04-08", photo:"photos/Debopom_Debroy.jpg", spouseName:"Dipanwita Banik", childrenNames:["Debodhriti Debroy"] },
+  { name: "Dipanwita Banik", type:["Friend"], gender:"Female", date:"11-06", photo:"photos/Dipanwita_Banik.jpg", spouseName:"Debopom Debroy", childrenNames:["Debodhriti Debroy"] },
+
+  // Debosmita is spouse of Kamanasish but NOT a friend entry (so she shouldn't be on the first page)
+  { name: "Debosmita Bhattacharjee", type:["Spouse"], gender:"Female", date:"02-22", photo:"photos/Debosmita_Bhattacharjee.jpg" },
+
+  // Child record — will appear under parents when parents expand
+  { name: "Debodhriti Debroy", type:["Child"], gender:"Female", date:"04-29", photo:"photos/Debodhriti_Debroy.jpg", parents:["Debopom Debroy","Dipanwita Banik"] }
+];
+
+/* normalize safety */
+people.forEach(p=>{
+  if (!Array.isArray(p.type)) p.type = p.type ? [p.type] : [];
+  if (!p.gender) p.gender = 'All';
+  if (!p.childrenNames) p.childrenNames = [];
+  if (!p.parents) p.parents = [];
+});
+
+/* helper: find person by name */
+function findPerson(name){
+  return people.find(p => p.name === name) || null;
+}
+
+/* fallback avatar */
+function avatarFor(name){
+  const initials = (name||'').split(' ').map(n=>n[0]||'').join('').slice(0,2).toUpperCase();
+  return 'https://via.placeholder.com/150?text=' + encodeURIComponent(initials);
+}
+
+/* small util: days until (MM-DD) */
+function getDaysUntil(mmdd){
+  if(!mmdd || !/^\d{2}-\d{2}$/.test(mmdd)) return Infinity;
+  const [mm,dd] = mmdd.split('-').map(Number);
+  const today = new Date(); const todayMid = new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  let next = new Date(today.getFullYear(), mm-1, dd);
+  if(next < todayMid) next.setFullYear(today.getFullYear()+1);
+  const diff = Math.ceil((next - todayMid) / (24*60*60*1000));
+  return diff;
+}
+
+/* ---------------------
+   Rendering (Friends Only)
+   --------------------- */
+
+let expandedMap = {}; // track which friend is expanded
+let searchTerm = '';
+
+function renderFriends(){
+  const grid = document.getElementById('friendsGrid');
+
+  // show only friends on first page (type includes Friend)
+  let friends = people.filter(p => p.type.includes('Friend'));
+
+  // apply search filter
+  if(searchTerm.trim()){
+    const q = searchTerm.toLowerCase();
+    friends = friends.filter(f => f.name.toLowerCase().includes(q));
+  }
+
+  // sort alphabetically
+  friends.sort((a,b)=> a.name.localeCompare(b.name));
+
+  // build HTML
+  const html = friends.map(friend => {
+    const days = getDaysUntil(friend.date);
+    const todayBadge = days === 0 ? '<span class="badge">Today</span>' : '';
+    const daysText = (days === Infinity) ? '' : `<div class="meta">${days === 0 ? 'Today' : days + ' day' + (days===1?'':'s') + ' to go'}</div>`;
+
+    // expanded tree (rendered if expandedMap[friend.name] true)
+    const isExpanded = !!expandedMap[friend.name];
+    const treeInner = isExpanded ? renderTreeForFriend(friend) : '';
+
+    // set max-height later via inline style to animate
+    const treeMax = isExpanded ? '1000px' : '0px';
+
+    return `
+      <article class="card" role="article" aria-expanded="${isExpanded}">
+        <img class="avatar" src="${friend.photo || avatarFor(friend.name)}" alt="${friend.name}" onerror="this.onerror=null;this.src='${avatarFor(friend.name)}'">
+        <div class="name">${friend.name}</div>
+        <div class="meta">${friend.type.join(', ')} ${todayBadge}</div>
+        ${daysText}
+        <div class="expand-toggle">
+          <button class="toggle-btn" aria-controls="tree-${escapeId(friend.name)}" onclick="toggleExpand('${escapeJs(friend.name)}')">
+            ${isExpanded ? 'Collapse' : 'View family'}
+          </button>
         </div>
 
-        <!-- EXISTING CONTROLS -->
-        <select id="genderFilter" onchange="renderCards()" aria-label="Filter by gender">
-            <option value="All">All Genders</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select>
+        <div id="tree-${escapeId(friend.name)}" class="tree-wrap" style="max-height:${treeMax}">
+          ${treeInner}
+        </div>
+      </article>
+    `;
+  }).join('');
 
-        <select id="categoryFilter" onchange="renderCards()" aria-label="Filter by category">
-            <option value="All">All Categories</option>
-            <option value="Friend">School Friends</option>
-            <option value="Spouse">Spouses</option>
-            <option value="Child">Children</option>
-            <option value="Anniversary">Wedding Anniversaries</option>
-        </select>
+  grid.innerHTML = html || `<div style="grid-column:1/-1;text-align:center;color:var(--muted)">No friends found</div>`;
+}
 
-        <button onclick="setSort('alpha')" id="btnAlpha" class="active-sort">Sort A-Z</button>
-        <button onclick="setSort('date')" id="btnDate">Sort by Date</button>
-    </div>
+/* escape helpers for safe IDs and inline JS */
+function escapeId(s){ return (s||'').replace(/[^a-z0-9\-_]/gi,'-') }
+function escapeJs(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'\\"') }
 
-    <div class="grid-container" id="cardGrid" aria-live="polite"></div>
+/* render the tree HTML for a friend */
+function renderTreeForFriend(friend){
+  // main node (friend)
+  const friendNode = `
+    <div class="tree">
+      <div class="node" aria-label="Friend">
+        <img class="n-avatar" src="${friend.photo || avatarFor(friend.name)}" alt="${friend.name}" onerror="this.onerror=null;this.src='${avatarFor(friend.name)}'">
+        <div class="n-body">
+          <div class="n-title">${friend.name} <span style="font-size:0.8rem;color:var(--muted);">(${friend.type.join(', ')})</span></div>
+          <div class="n-sub">Birthday: ${formatDate(friend.date)} ${birthDays(friend.date)}</div>
+        </div>
+      </div>
+  `;
 
-    <script>
-        // ---------- DATA ----------
-        const people = [
-            { name: "Kamanasish Bhattacharjee", type: ["Friend"], gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg" },
-            { name: "Debosmita Bhattacharjee", type: ["Spouse"], gender: "Female", date: "02-22", photo: "photos/Debosmita_Bhattacharjee.jpg" },
-            { name: "Debopom Debroy", type: ["Friend","Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg" },
-            { name: "Dipanwita Banik", type: ["Friend","Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg" },
-            { name: "Kamanasish & Debosmita", type: ["Anniversary"], gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
-            { name: "Debodhriti Debroy", type: ["Child"], gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg" }
-        ];
+  // spouse node: find spouse by friend.spouseName if present
+  let spouseHtml = '';
+  if(friend.spouseName){
+    const spousePerson = findPerson(friend.spouseName);
+    if(spousePerson){
+      spouseHtml = `
+        <div class="node" aria-label="Spouse">
+          <img class="n-avatar" src="${spousePerson.photo || avatarFor(spousePerson.name)}" alt="${spousePerson.name}" onerror="this.onerror=null;this.src='${avatarFor(spousePerson.name)}'">
+          <div class="n-body">
+            <div class="n-title">${spousePerson.name} <span style="font-size:0.8rem;color:var(--muted);">(${spousePerson.type.join(', ')})</span></div>
+            <div class="n-sub">Birthday: ${formatDate(spousePerson.date)} ${birthDays(spousePerson.date)}</div>
+          </div>
+        </div>
+      `;
+    } else {
+      spouseHtml = `
+        <div class="node" aria-label="Spouse">
+          <div style="width:48px;height:48px;border-radius:50%;background:#f5f5f5;display:inline-block;margin-right:12px"></div>
+          <div class="n-body">
+            <div class="n-title">${friend.spouseName}</div>
+            <div class="n-sub">(spouse - details not in list)</div>
+          </div>
+        </div>
+      `;
+    }
+  }
 
-        // Ensure consistent structure
-        people.forEach(p => {
-            if (!Array.isArray(p.type)) p.type = p.type ? [p.type] : [];
-            if (!p.gender) p.gender = 'All';
-        });
+  // children nodes: either from friend.childrenNames or by scanning people where parents include friend
+  let childrenList = [];
+  // prefer explicit childrenNames if present
+  if(Array.isArray(friend.childrenNames) && friend.childrenNames.length){
+    childrenList = friend.childrenNames.map(n => findPerson(n) || { name:n, type:['Child'] });
+  } else {
+    // fallback: find people who listed this friend as parent
+    childrenList = people.filter(p => Array.isArray(p.parents) && p.parents.includes(friend.name) && p.type.includes('Child'));
+  }
 
-        let currentSort = 'alpha';
-        let currentSearch = ''; // search term state
+  let childrenHtml = '';
+  if(childrenList.length){
+    childrenHtml = `<div class="children">`;
+    childrenList.forEach(child=>{
+      const parents = (child.parents && child.parents.length) ? child.parents : (child.name === 'Debodhriti Debroy' ? ['Debopom Debroy','Dipanwita Banik'] : []);
+      childrenHtml += `
+        <div class="node" aria-label="Child">
+          <img class="n-avatar" src="${child.photo || avatarFor(child.name)}" alt="${child.name}" onerror="this.onerror=null;this.src='${avatarFor(child.name)}'">
+          <div class="n-body">
+            <div class="n-title">${child.name} <span style="font-size:0.8rem;color:var(--muted);">(${child.type.join(',')})</span></div>
+            <div class="n-sub">Birthday: ${formatDate(child.date)} ${birthDays(child.date)}</div>
+            <div class="parents-block"><strong>Parents:</strong> ${parents.map(p=>`<span style="margin-left:8px">${p}</span>`).join('')}</div>
+          </div>
+        </div>
+      `;
+    });
+    childrenHtml += `</div>`;
+  }
 
-        // ---------- UTILITIES ----------
-        function getZodiac(dayIn, monthIn) {
-            const day = Number(dayIn);
-            const month = Number(monthIn); // 1..12
-            const cutoffs = {
-                1: 19, 2: 18, 3: 20, 4: 19, 5: 20, 6: 20,
-                7: 22, 8: 22, 9: 22, 10: 22, 11: 21, 12: 21
-            };
-            const names = {
-                1: 'Capricorn', 2: 'Aquarius', 3: 'Pisces', 4: 'Aries',
-                5: 'Taurus', 6: 'Gemini', 7: 'Cancer', 8: 'Leo',
-                9: 'Virgo', 10: 'Libra', 11: 'Scorpio', 12: 'Sagittarius'
-            };
-            if (day > (cutoffs[month] || 31)) {
-                let next = month + 1;
-                if (next > 12) next = 1;
-                return names[next];
-            } else {
-                return names[month];
-            }
-        }
+  const combined = friendNode + (spouseHtml ? `<div style="margin-top:8px">${spouseHtml}</div>` : '') + (childrenHtml ? childrenHtml : '') + `</div>`;
+  return combined;
+}
 
-        function getDaysUntil(dateString) {
-            if (!dateString || !/^\d{2}-\d{2}$/.test(dateString)) return Infinity;
-            const [mm, dd] = dateString.split('-').map(Number);
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            let next = new Date(currentYear, mm - 1, dd, 0, 0, 0, 0);
+/* small helpers for displaying date text & badge */
+function formatDate(mmdd){
+  if(!mmdd) return '—';
+  const [mm,dd] = mmdd.split('-').map(Number);
+  try{
+    const d = new Date(2000, mm-1, dd);
+    return d.toLocaleDateString('en-US',{ month:'short', day:'numeric' });
+  }catch(e){ return mmdd; }
+}
+function birthDays(mmdd){
+  const days = getDaysUntil(mmdd);
+  if(days === Infinity) return '';
+  if(days === 0) return '• Today';
+  return `• ${days}d`;
+}
 
-            const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
-            if (next < todayMid) {
-                next.setFullYear(currentYear + 1);
-            }
+/* toggle expand/collapse */
+function toggleExpand(friendName){
+  expandedMap[friendName] = !expandedMap[friendName];
+  renderFriends();
 
-            const oneDay = 24 * 60 * 60 * 1000;
-            const diff = Math.ceil((next - todayMid) / oneDay);
-            return diff;
-        }
+  // animate max-height of opened tree after render
+  setTimeout(()=> {
+    const id = 'tree-' + escapeId(friendName);
+    const el = document.getElementById(id);
+    if(el){
+      if(expandedMap[friendName]){
+        el.style.maxHeight = el.scrollHeight + 30 + 'px';
+      } else {
+        el.style.maxHeight = '0px';
+      }
+    }
+  }, 60);
+}
 
-        function fallbackAvatar(name) {
-            return 'https://via.placeholder.com/150?text=' + encodeURIComponent(
-                name.split(' ')
-                    .map(word => word[0] || '')
-                    .join('')
-                    .slice(0, 2)
-            );
-        }
+/* search input handler */
+function onSearch(){
+  const v = document.getElementById('searchInput').value || '';
+  searchTerm = v;
+  renderFriends();
+}
 
-        // ---------- SEARCH + AUTOCOMPLETE ----------
-        function handleSearch() {
-            const input = document.getElementById("searchInput").value.trim();
-            currentSearch = input.toLowerCase();
+function clearSearch(){
+  document.getElementById('searchInput').value = '';
+  searchTerm = '';
+  renderFriends();
+}
 
-            const box = document.getElementById("autocompleteBox");
+/* initial render on load */
+renderFriends();
 
-            if (input.length === 0) {
-                box.style.display = "none";
-                renderCards();
-                return;
-            }
+/* utility escapes (same as above) */
+function escapeId(s){ return (s||'').replace(/[^a-z0-9\-_]/gi,'-') }
+function escapeJs(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'\\"') }
 
-            const matches = people
-                .filter(p => p.name.toLowerCase().includes(currentSearch))
-                .slice(0, 6);
-
-            if (matches.length === 0) {
-                box.style.display = "none";
-                renderCards();
-                return;
-            }
-
-            box.innerHTML = matches.map(p => `
-                <div onclick="selectSearch('${p.name.replace(/'/g, "\\'")}')" 
-                    style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f2f2f2;"
-                    onmouseover="this.style.background='#f0f0f0'"
-                    onmouseout="this.style.background='white'">
-                    ${p.name}
-                </div>
-            `).join("");
-
-            box.style.display = "block";
-            renderCards();
-        }
-
-        function selectSearch(name) {
-            document.getElementById("searchInput").value = name;
-            document.getElementById("autocompleteBox").style.display = "none";
-            currentSearch = name.toLowerCase();
-            renderCards();
-        }
-
-        // Close autocomplete if click outside
-        document.addEventListener('click', (e) => {
-            const box = document.getElementById("autocompleteBox");
-            const input = document.getElementById("searchInput");
-            if (!box.contains(e.target) && e.target !== input) {
-                box.style.display = "none";
-            }
-        });
-
-        // ---------- SORT ----------
-        function setSort(type) {
-            currentSort = type;
-            const btnAlpha = document.getElementById('btnAlpha');
-            const btnDate = document.getElementById('btnDate');
-            btnAlpha.classList.toggle('active-sort', type === 'alpha');
-            btnDate.classList.toggle('active-sort', type === 'date');
-            renderCards();
-        }
-
-        // ---------- RENDERING ----------
-        function personToHTML(person) {
-            const gridDate = person.date || '';
-            const parts = gridDate.split('-');
-            let dateStr = 'Date not set';
-            let zodiac = '';
-            if (parts.length === 2) {
-                const [m, d] = parts.map(Number);
-                const dateObj = new Date(2000, m - 1, d);
-                dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-                zodiac = person.type.includes('Anniversary') ? '❤️' : getZodiac(d, m);
-            }
-
-            const daysLeft = getDaysUntil(person.date);
-            const isToday = daysLeft === 0;
-            const countdownText = isToday
-                ? '🎉 TODAY! 🎉'
-                : (daysLeft === Infinity ? 'Date not set' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go`);
-            const countdownStyle = isToday ? 'color:#E91E63;font-weight:700;' : '';
-
-            const tagsHtml = (person.type || [])
-                .map(tag => `<span class="tag ${tag}">${tag}</span>`)
-                .join('');
-
-            const genderClass = (person.gender === 'Male' || person.gender === 'Female') ? person.gender : '';
-            const safePhoto = person.photo || fallbackAvatar(person.name);
-
-            return `
-                <div class="card ${genderClass}">
-                    <img src="${safePhoto}" alt="${person.name}" class="avatar"
-                        onerror="this.onerror=null;this.src='${fallbackAvatar(person.name)}'">
-                    <div class="name">${person.name}</div>
-                    ${tagsHtml}
-                    <div class="date-info">
-                        <span>${dateStr}</span>
-                        <span>${zodiac}</span>
-                    </div>
-                    <div class="countdown" style="${countdownStyle}">
-                        ${countdownText}
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderCards() {
-            const grid = document.getElementById('cardGrid');
-            const genderFilter = document.getElementById('genderFilter').value;
-            const categoryFilter = document.getElementById('categoryFilter').value;
-
-            let filtered = people.filter(person => {
-                const gMatch =
-                    genderFilter === 'All' ||
-                    person.gender === 'All' ||
-                    person.gender === genderFilter ||
-                    person.type.includes('Anniversary');
-
-                const cMatch =
-                    categoryFilter === 'All' ||
-                    person.type.includes(categoryFilter);
-
-                const sMatch =
-                    !currentSearch ||
-                    person.name.toLowerCase().includes(currentSearch);
-
-                return gMatch && cMatch && sMatch;
-            });
-
-            if (currentSort === 'alpha') {
-                filtered.sort((a, b) => a.name.localeCompare(b.name));
-            } else {
-                filtered.sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date));
-            }
-
-            grid.innerHTML = filtered.length
-                ? filtered.map(personToHTML).join('')
-                : "<div style='grid-column:1/-1;text-align:center;color:var(--text-light)'>No entries found</div>";
-        }
-
-        // initial render
-        renderCards();
-    </script>
-
+/* expose to console for debugging */
+window._PRAY = { people, renderFriends, toggleExpand };
+</script>
 </body>
 </html>
