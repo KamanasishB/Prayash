@@ -128,7 +128,7 @@
         }
 
         /* Type specific styling */
-        .tag.Alumni { background-color: #e8f5e9; color: #2e7d32; }
+        .tag.Friend { background-color: #e8f5e9; color: #2e7d32; }
         .tag.Spouse { background-color: #fff3e0; color: #ef6c00; }
         .tag.Child { background-color: #f3e5f5; color: #7b1fa2; }
 
@@ -137,8 +137,8 @@
 <body>
 
     <header>
-        <h1>Our Circle</h1>
-        <p>Celebrating the milestones of our school group & families.</p>
+        <h1>Prayash Calendar</h1>
+        <p>Celebrating the special days of our school group & families</p>
     </header>
 
     <div class="controls">
@@ -150,7 +150,7 @@
 
         <select id="categoryFilter" onchange="renderCards()">
             <option value="All">All Categories</option>
-            <option value="Alumni">School Friends</option>
+            <option value="Friend">School Friends</option>
             <option value="Spouse">Spouses</option>
             <option value="Child">Children</option>
             <option value="Anniversary">Wedding Anniversaries</option>
@@ -168,11 +168,11 @@
         // Edit this list to add your real friends!
         // Format: MM-DD for dates.
         const people = [
-            { name: "Arjun Mehta", type: "Alumni", gender: "Male", date: "05-15", photo: "https://i.pravatar.cc/150?img=11" },
+            { name: "Kamanasish Bhattacharjee", type: "Friend", gender: "Male", date: "11-08", photo: "https://i.pravatar.cc/150?img=11" },
             { name: "Priya Mehta", type: "Spouse", gender: "Female", date: "08-22", photo: "https://i.pravatar.cc/150?img=5" },
             { name: "Rohan Mehta", type: "Child", gender: "Male", date: "12-10", photo: "https://i.pravatar.cc/150?img=13" },
-            { name: "Sarah Jenkins", type: "Alumni", gender: "Female", date: "02-14", photo: "https://i.pravatar.cc/150?img=9" },
-            { name: "Mike Ross", type: "Alumni", gender: "Male", date: "11-05", photo: "https://i.pravatar.cc/150?img=3" },
+            { name: "Sarah Jenkins", type: "Friend", gender: "Female", date: "02-14", photo: "https://i.pravatar.cc/150?img=9" },
+            { name: "Mike Ross", type: "Friend", gender: "Male", date: "11-05", photo: "https://i.pravatar.cc/150?img=3" },
             { name: "Arjun & Priya", type: "Anniversary", gender: "All", date: "06-20", photo: "https://images.unsplash.com/photo-1522673607200-1645062cd26c?auto=format&fit=crop&w=150&q=80" },
             { name: "Ananya Gupta", type: "Child", gender: "Female", date: "01-10", photo: "https://i.pravatar.cc/150?img=32" },
         ];
