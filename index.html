@@ -168,10 +168,10 @@
         // Edit this list to add your real friends!
         // Format: MM-DD for dates.
         const people = [
-            { name: "Kamanasish Bhattacharjee", type: "Friend", gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg" },
-            { name: "Debosmita Bhattacharjee", type: "Spouse", gender: "Female", date: "02-22", photo: "photos/Debosmita_Bhattacharjee.jpg" },
-            { name: "Debopom Debroy", type: "Friend", gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg" },
-            { name: "Dipanwita Banik", type: "Friend", gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg" },
+            { name: "Kamanasish Bhattacharjee", type: ["Friend"], gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg" },
+            { name: "Debosmita Bhattacharjee", type: ["Spouse"], gender: "Female", date: "02-22", photo: "photos/Debosmita_Bhattacharjee.jpg" },
+            { name: "Debopom Debroy", type: ["Friend", "Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg" },
+            { name: "Dipanwita Banik", type: ["Friend", "Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg" },
             { name: "Kamanasish & Debosmita", type: "Anniversary", gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
             { name: "Debodhriti Debroy", type: "Child", gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg" },
         ];
@@ -216,7 +216,7 @@
             // 1. Filter
             let filtered = people.filter(person => {
                 const gMatch = genderFilter === "All" || person.gender === genderFilter || person.type === "Anniversary";
-                const cMatch = categoryFilter === "All" || person.type === categoryFilter;
+                const cMatch = categoryFilter === "All" || person.type.includes(categoryFilter);
                 return gMatch && cMatch;
             });
 
@@ -240,7 +240,7 @@
                     <div class="card ${person.gender}">
                         <img src="${person.photo}" alt="${person.name}" class="avatar">
                         <div class="name">${person.name}</div>
-                        <span class="tag ${person.type}">${person.type}</span>
+                        ${person.type.map(tag => `<span class="tag ${tag}">${tag}</span>`).join('')}
                         
                         <div class="date-info">
                             <span>${dateStr}</span>
