@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Circle | Special Days</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Prayash | Special Days</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -25,7 +25,6 @@
             padding: 20px;
         }
 
-        /* Header Section */
         header {
             text-align: center;
             margin-bottom: 40px;
@@ -35,13 +34,13 @@
         h1 { font-weight: 600; color: var(--text-main); margin-bottom: 10px; }
         p { color: var(--text-light); }
 
-        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
             margin-bottom: 30px;
+            position: relative; /* so autocomplete can be positioned nicely */
         }
 
         select, button {
@@ -51,19 +50,21 @@
             background: white;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
             outline: none;
         }
 
-        button:hover, select:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
+        button:hover, select:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06); 
+        }
+
         .active-sort {
             background-color: var(--primary);
             color: white;
             border-color: var(--primary);
         }
 
-        /* Grid Layout */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -72,21 +73,19 @@
             margin: 0 auto;
         }
 
-        /* Card Design */
         .card {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 25px;
             text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
+            transition: transform 0.25s ease;
             position: relative;
             overflow: hidden;
         }
 
         .card:hover { transform: translateY(-5px); }
 
-        /* Gender indicator stripe */
         .card.Male { border-bottom: 4px solid #2196F3; }
         .card.Female { border-bottom: 4px solid #E91E63; }
 
@@ -98,10 +97,11 @@
             margin-bottom: 15px;
             border: 3px solid white;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: inline-block;
         }
 
         .name { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
-        
+
         .tag {
             font-size: 0.75rem;
             padding: 4px 12px;
@@ -120,19 +120,27 @@
             gap: 10px;
             color: var(--primary);
             font-weight: 600;
+            margin-top: 8px;
         }
 
         .countdown {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-light);
             margin-top: 10px;
         }
 
-        /* Type specific styling */
         .tag.Friend { background-color: #e8f5e9; color: #2e7d32; }
         .tag.Spouse { background-color: #fff3e0; color: #ef6c00; }
         .tag.Child { background-color: #f3e5f5; color: #7b1fa2; }
+        .tag.Anniversary { background-color: #ffece6; color: #d32f2f; }
 
+        /* simple autocomplete styles */
+        .search-wrapper {
+            position: relative;
+        }
+        #autocompleteBox div {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
@@ -143,13 +151,29 @@
     </header>
 
     <div class="controls">
-        <select id="genderFilter" onchange="renderCards()">
+        <!-- SEARCH BAR + AUTOCOMPLETE (intellisense) -->
+        <div class="search-wrapper">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="Search name..." 
+                oninput="handleSearch()" 
+                autocomplete="off"
+                style="padding:10px 20px; border-radius:20px; border:1px solid #ddd; width:220px;"
+            >
+            <div id="autocompleteBox" 
+                style="position:absolute; top:42px; left:0; background:white; border:1px solid #ddd; width:220px; display:none; z-index:100; max-height:200px; overflow-y:auto; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.06);">
+            </div>
+        </div>
+
+        <!-- EXISTING CONTROLS -->
+        <select id="genderFilter" onchange="renderCards()" aria-label="Filter by gender">
             <option value="All">All Genders</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
         </select>
 
-        <select id="categoryFilter" onchange="renderCards()">
+        <select id="categoryFilter" onchange="renderCards()" aria-label="Filter by category">
             <option value="All">All Categories</option>
             <option value="Friend">School Friends</option>
             <option value="Spouse">Spouses</option>
@@ -161,56 +185,180 @@
         <button onclick="setSort('date')" id="btnDate">Sort by Date</button>
     </div>
 
-    <div class="grid-container" id="cardGrid"></div>
+    <div class="grid-container" id="cardGrid" aria-live="polite"></div>
 
     <script>
-        // --- 1. THE DATA ---
+        // ---------- DATA ----------
         const people = [
             { name: "Kamanasish Bhattacharjee", type: ["Friend"], gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg" },
             { name: "Debosmita Bhattacharjee", type: ["Spouse"], gender: "Female", date: "02-22", photo: "photos/Debosmita_Bhattacharjee.jpg" },
-            { name: "Debopom Debroy", type: ["Friend", "Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg" },
-            { name: "Dipanwita Banik", type: ["Friend", "Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg" },
+            { name: "Debopom Debroy", type: ["Friend","Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg" },
+            { name: "Dipanwita Banik", type: ["Friend","Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg" },
             { name: "Kamanasish & Debosmita", type: ["Anniversary"], gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
-            { name: "Debodhriti Debroy", type: ["Child"], gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg" },
+            { name: "Debodhriti Debroy", type: ["Child"], gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg" }
         ];
 
-        // ✅ Normalize: always make type an array
+        // Ensure consistent structure
         people.forEach(p => {
-            if (!Array.isArray(p.type)) {
-                p.type = p.type ? [p.type] : [];
-            }
+            if (!Array.isArray(p.type)) p.type = p.type ? [p.type] : [];
+            if (!p.gender) p.gender = 'All';
         });
 
         let currentSort = 'alpha';
+        let currentSearch = ''; // search term state
 
-        function getZodiac(day, month) {
-            const zodiac =['','Capricorn','Aquarius','Pisces','Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn'];
-            const last_day =['',19,18,20,19,20,20,22,22,22,22,21,21,19];
-            day = Number(day);
-            month = Number(month);
-            return (day > last_day[month]) ? zodiac[month + 1] : zodiac[month];
+        // ---------- UTILITIES ----------
+        function getZodiac(dayIn, monthIn) {
+            const day = Number(dayIn);
+            const month = Number(monthIn); // 1..12
+            const cutoffs = {
+                1: 19, 2: 18, 3: 20, 4: 19, 5: 20, 6: 20,
+                7: 22, 8: 22, 9: 22, 10: 22, 11: 21, 12: 21
+            };
+            const names = {
+                1: 'Capricorn', 2: 'Aquarius', 3: 'Pisces', 4: 'Aries',
+                5: 'Taurus', 6: 'Gemini', 7: 'Cancer', 8: 'Leo',
+                9: 'Virgo', 10: 'Libra', 11: 'Scorpio', 12: 'Sagittarius'
+            };
+            if (day > (cutoffs[month] || 31)) {
+                let next = month + 1;
+                if (next > 12) next = 1;
+                return names[next];
+            } else {
+                return names[month];
+            }
         }
 
         function getDaysUntil(dateString) {
+            if (!dateString || !/^\d{2}-\d{2}$/.test(dateString)) return Infinity;
+            const [mm, dd] = dateString.split('-').map(Number);
             const today = new Date();
             const currentYear = today.getFullYear();
-            const [month, day] = dateString.split('-').map(Number);
-            let nextDate = new Date(currentYear, month - 1, day);
+            let next = new Date(currentYear, mm - 1, dd, 0, 0, 0, 0);
 
-            if (today > nextDate) {
-                nextDate.setFullYear(currentYear + 1);
+            const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+            if (next < todayMid) {
+                next.setFullYear(currentYear + 1);
             }
-            
+
             const oneDay = 24 * 60 * 60 * 1000;
-            const diffDays = Math.round(Math.abs((nextDate - today) / oneDay));
-            return diffDays;
+            const diff = Math.ceil((next - todayMid) / oneDay);
+            return diff;
         }
 
+        function fallbackAvatar(name) {
+            return 'https://via.placeholder.com/150?text=' + encodeURIComponent(
+                name.split(' ')
+                    .map(word => word[0] || '')
+                    .join('')
+                    .slice(0, 2)
+            );
+        }
+
+        // ---------- SEARCH + AUTOCOMPLETE ----------
+        function handleSearch() {
+            const input = document.getElementById("searchInput").value.trim();
+            currentSearch = input.toLowerCase();
+
+            const box = document.getElementById("autocompleteBox");
+
+            if (input.length === 0) {
+                box.style.display = "none";
+                renderCards();
+                return;
+            }
+
+            const matches = people
+                .filter(p => p.name.toLowerCase().includes(currentSearch))
+                .slice(0, 6);
+
+            if (matches.length === 0) {
+                box.style.display = "none";
+                renderCards();
+                return;
+            }
+
+            box.innerHTML = matches.map(p => `
+                <div onclick="selectSearch('${p.name.replace(/'/g, "\\'")}')" 
+                    style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f2f2f2;"
+                    onmouseover="this.style.background='#f0f0f0'"
+                    onmouseout="this.style.background='white'">
+                    ${p.name}
+                </div>
+            `).join("");
+
+            box.style.display = "block";
+            renderCards();
+        }
+
+        function selectSearch(name) {
+            document.getElementById("searchInput").value = name;
+            document.getElementById("autocompleteBox").style.display = "none";
+            currentSearch = name.toLowerCase();
+            renderCards();
+        }
+
+        // Close autocomplete if click outside
+        document.addEventListener('click', (e) => {
+            const box = document.getElementById("autocompleteBox");
+            const input = document.getElementById("searchInput");
+            if (!box.contains(e.target) && e.target !== input) {
+                box.style.display = "none";
+            }
+        });
+
+        // ---------- SORT ----------
         function setSort(type) {
             currentSort = type;
-            document.getElementById('btnAlpha').className = type === 'alpha' ? 'active-sort' : '';
-            document.getElementById('btnDate').className = type === 'date' ? 'active-sort' : '';
+            const btnAlpha = document.getElementById('btnAlpha');
+            const btnDate = document.getElementById('btnDate');
+            btnAlpha.classList.toggle('active-sort', type === 'alpha');
+            btnDate.classList.toggle('active-sort', type === 'date');
             renderCards();
+        }
+
+        // ---------- RENDERING ----------
+        function personToHTML(person) {
+            const gridDate = person.date || '';
+            const parts = gridDate.split('-');
+            let dateStr = 'Date not set';
+            let zodiac = '';
+            if (parts.length === 2) {
+                const [m, d] = parts.map(Number);
+                const dateObj = new Date(2000, m - 1, d);
+                dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                zodiac = person.type.includes('Anniversary') ? '❤️' : getZodiac(d, m);
+            }
+
+            const daysLeft = getDaysUntil(person.date);
+            const isToday = daysLeft === 0;
+            const countdownText = isToday
+                ? '🎉 TODAY! 🎉'
+                : (daysLeft === Infinity ? 'Date not set' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go`);
+            const countdownStyle = isToday ? 'color:#E91E63;font-weight:700;' : '';
+
+            const tagsHtml = (person.type || [])
+                .map(tag => `<span class="tag ${tag}">${tag}</span>`)
+                .join('');
+
+            const genderClass = (person.gender === 'Male' || person.gender === 'Female') ? person.gender : '';
+            const safePhoto = person.photo || fallbackAvatar(person.name);
+
+            return `
+                <div class="card ${genderClass}">
+                    <img src="${safePhoto}" alt="${person.name}" class="avatar"
+                        onerror="this.onerror=null;this.src='${fallbackAvatar(person.name)}'">
+                    <div class="name">${person.name}</div>
+                    ${tagsHtml}
+                    <div class="date-info">
+                        <span>${dateStr}</span>
+                        <span>${zodiac}</span>
+                    </div>
+                    <div class="countdown" style="${countdownStyle}">
+                        ${countdownText}
+                    </div>
+                </div>
+            `;
         }
 
         function renderCards() {
@@ -218,62 +366,38 @@
             const genderFilter = document.getElementById('genderFilter').value;
             const categoryFilter = document.getElementById('categoryFilter').value;
 
-            // 1. Filter
             let filtered = people.filter(person => {
-                const gMatch = genderFilter === "All" 
-                    || person.gender === genderFilter 
-                    || person.type.includes("Anniversary");   // ✅ type is array now
+                const gMatch =
+                    genderFilter === 'All' ||
+                    person.gender === 'All' ||
+                    person.gender === genderFilter ||
+                    person.type.includes('Anniversary');
 
-                const cMatch = categoryFilter === "All" 
-                    || person.type.includes(categoryFilter);   // ✅ safe
+                const cMatch =
+                    categoryFilter === 'All' ||
+                    person.type.includes(categoryFilter);
 
-                return gMatch && cMatch;
+                const sMatch =
+                    !currentSearch ||
+                    person.name.toLowerCase().includes(currentSearch);
+
+                return gMatch && cMatch && sMatch;
             });
 
-            // 2. Sort
             if (currentSort === 'alpha') {
                 filtered.sort((a, b) => a.name.localeCompare(b.name));
             } else {
                 filtered.sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date));
             }
 
-            // 3. Render
-            grid.innerHTML = filtered.map(person => {
-                const [m, d] = person.date.split('-');
-                const dateObj = new Date(2000, m-1, d); // Dummy year for formatting
-                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-                const daysLeft = getDaysUntil(person.date);
-                const isToday = daysLeft === 0;
-
-                const zodiac = person.type.includes('Anniversary') 
-                    ? '❤️' 
-                    : getZodiac(d, m);                     // ✅ uses array check
-
-                const tags = person.type
-                    .map(tag => `<span class="tag ${tag}">${tag}</span>`)
-                    .join('');
-
-                return `
-                    <div class="card ${person.gender}">
-                        <img src="${person.photo}" alt="${person.name}" class="avatar">
-                        <div class="name">${person.name}</div>
-                        ${tags}
-                        
-                        <div class="date-info">
-                            <span>${dateStr}</span>
-                            <span>${zodiac}</span>
-                        </div>
-                        
-                        <div class="countdown" style="color: ${isToday ? '#E91E63' : 'inherit'}; font-weight: ${isToday ? 'bold' : 'normal'}">
-                            ${isToday ? "🎉 TODAY! 🎉" : `${daysLeft} days to go`}
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            grid.innerHTML = filtered.length
+                ? filtered.map(personToHTML).join('')
+                : "<div style='grid-column:1/-1;text-align:center;color:var(--text-light)'>No entries found</div>";
         }
 
-        // Initial Render
+        // initial render
         renderCards();
     </script>
+
 </body>
 </html>
