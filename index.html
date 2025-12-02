@@ -1,403 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Our Circle | Special Days</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --bg: #F0F2F5;
-            --card-bg: #FFFFFF;
-            --text-main: #2D3436;
-            --text-light: #636E72;
-            --male-color: #e3f2fd;
-            --female-color: #fce4ec;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            padding: 20px;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-        }
-
-        h1 { font-weight: 600; color: var(--text-main); margin-bottom: 10px; }
-        p { color: var(--text-light); }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 30px;
-            position: relative; /* so autocomplete can be positioned nicely */
-        }
-
-        select, button {
-            padding: 10px 20px;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            background: white;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            outline: none;
-        }
-
-        button:hover, select:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.06); 
-        }
-
-        .active-sort {
-            background-color: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            transition: transform 0.25s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card:hover { transform: translateY(-5px); }
-
-        .card.Male { border-bottom: 4px solid #2196F3; }
-        .card.Female { border-bottom: 4px solid #E91E63; }
-
-        .avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 3px solid white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: inline-block;
-        }
-
-        .name { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
-
-        .tag {
-            font-size: 0.75rem;
-            padding: 4px 12px;
-            border-radius: 12px;
-            background: #eee;
-            color: #555;
-            display: inline-block;
-            margin-bottom: 15px;
-            margin-right: 6px;
-        }
-
-        .date-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary);
-            font-weight: 600;
-            margin-top: 8px;
-        }
-
-        .countdown {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-top: 10px;
-        }
-
-        .tag.Friend { background-color: #e8f5e9; color: #2e7d32; }
-        .tag.Spouse { background-color: #fff3e0; color: #ef6c00; }
-        .tag.Child { background-color: #f3e5f5; color: #7b1fa2; }
-        .tag.Anniversary { background-color: #ffece6; color: #d32f2f; }
-
-        /* simple autocomplete styles */
-        .search-wrapper {
-            position: relative;
-        }
-        #autocompleteBox div {
-            font-size: 0.9rem;
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Our Circle | Special Days — Interactive</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: #6C63FF;
+        --bg: #F0F2F5;
+        --card-bg: #FFFFFF;
+        --text-main: #2D3436;
+        --text-light: #636E72;
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-main);padding:20px}
+    header{text-align:center;margin-bottom:24px}
+    h1{margin:0;font-weight:600}
+    p{color:var(--text-light);margin:6px 0 0}
+    .controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+    .search{padding:10px 14px;border-radius:999px;border:1px solid #ddd;background:white;min-width:220px}
+    .btn{padding:10px 14px;border-radius:999px;border:1px solid #ddd;background:white;cursor:pointer}
+    .grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:25px;max-width:1200px;margin:0 auto}
+    .card{background:var(--card-bg);border-radius:18px;padding:20px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.06);position:relative;overflow:visible;transition:transform .18s}
+    .card:hover{transform:translateY(-6px)}
+    .card.Male{border-bottom:4px solid #2196F3}
+    .card.Female{border-bottom:4px solid #E91E63}
+    .avatar{width:100px;height:100px;border-radius:50%;object-fit:cover;margin-bottom:12px;border:3px solid white;box-shadow:0 6px 16px rgba(0,0,0,0.08);display:inline-block}
+    .name{font-size:1.15rem;font-weight:600;margin-bottom:6px}
+    .meta{color:var(--text-light);font-size:0.92rem;margin-bottom:8px}
+    .tag{font-size:0.75rem;padding:4px 10px;border-radius:12px;background:#eee;color:#555;display:inline-block;margin-bottom:10px;margin-right:6px}
+    .tag.Friend{background:#e8f5e9;color:#2e7d32}
+    .tag.Spouse{background:#fff3e0;color:#ef6c00}
+    .tag.Child{background:#f3e5f5;color:#7b1fa2}
+    .tag.Anniversary{background:#ffece6;color:#d32f2f}
+    .date-info{display:flex;justify-content:center;gap:8px;color:var(--primary);font-weight:600;margin-top:6px}
+    .countdown{font-size:0.9rem;color:var(--text-light);margin-top:8px}
+    .spouse-line{margin-top:8px;color:var(--text-light);font-size:0.95rem}
+    .spouse-link{color:var(--primary);cursor:pointer;text-decoration:underline;background:transparent;border:none;padding:0;font-weight:600}
+    .parents-block{margin-top:10px;font-size:0.88rem;color:var(--text-light);background:#fafafa;padding:8px;border-radius:8px;border:1px solid #f0f0f0}
+    .parents-block .parent-link{color:var(--primary);cursor:pointer;text-decoration:underline;font-weight:600;margin-left:8px}
+    /* tree details */
+    .tree-wrap{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.2,.9,.3,1);margin-top:12px}
+    .tree{padding-left:12px;position:relative}
+    .tree::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#eee;border-radius:2px}
+    .node{background:#fff;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 20px rgba(0,0,0,0.04);margin-bottom:12px;position:relative}
+    .node:before{content:"";position:absolute;left:-18px;top:16px;width:18px;height:2px;background:#eee}
+    .n-avatar{width:48px;height:48px;border-radius:50%;object-fit:cover}
+    .n-title{font-weight:600}
+    .n-sub{color:var(--text-light);font-size:0.86rem;margin-top:4px}
+    .children{padding-left:24px;margin-top:-6px}
+    .badge{font-size:0.75rem;padding:4px 8px;border-radius:999px;background:#f3f3ff;color:var(--primary);display:inline-block;margin-left:8px}
+    @media (max-width:560px){.avatar{width:80px;height:80px}.n-avatar{width:40px;height:40px}}
+</style>
 </head>
 <body>
 
-    <header>
-        <h1>Prayash Calendar</h1>
-        <p>Celebrating the special days of our school group & families</p>
-    </header>
+<header>
+    <h1>Our Circle | Special Days</h1>
+    <p>Click spouse/parent names to jump & expand their card</p>
+</header>
 
-    <div class="controls">
-        <!-- SEARCH BAR + AUTOCOMPLETE (intellisense) -->
-        <div class="search-wrapper">
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="Search name..." 
-                oninput="handleSearch()" 
-                autocomplete="off"
-                style="padding:10px 20px; border-radius:20px; border:1px solid #ddd; width:220px;"
-            >
-            <div id="autocompleteBox" 
-                style="position:absolute; top:42px; left:0; background:white; border:1px solid #ddd; width:220px; display:none; z-index:100; max-height:200px; overflow-y:auto; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.06);">
+<div class="controls">
+    <input id="searchInput" class="search" placeholder="Search name..." oninput="handleSearch()" autocomplete="off">
+    <select id="genderFilter" onchange="renderCards()" aria-label="Filter by gender">
+        <option value="All">All</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select>
+    <select id="categoryFilter" onchange="renderCards()" aria-label="Filter by category">
+        <option value="All">All Categories</option>
+        <option value="Friend">Friends</option>
+        <option value="Spouse">Spouses</option>
+        <option value="Child">Children</option>
+        <option value="Anniversary">Anniversaries</option>
+    </select>
+    <button onclick="setSort('alpha')" id="btnAlpha" class="btn active-sort">Sort A-Z</button>
+    <button onclick="setSort('date')" id="btnDate" class="btn">Sort by Date</button>
+</div>
+
+<div class="grid-container" id="cardGrid" aria-live="polite"></div>
+
+<script>
+/* ====================
+   Data (start from your given dataset; I added spouseName and parents where needed)
+   ==================== */
+const people = [
+    { name: "Kamanasish Bhattacharjee", type: ["Friend"], gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg", spouseName: "Debosmita Bhattacharjee" },
+    { name: "Debosmita Bhattacharjee", type: ["Spouse"], gender: "Female", date: "02-22", photo: "photos/Debosmita_Bhattacharjee.jpg" },
+    { name: "Debopom Debroy", type: ["Friend","Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg", spouseName: "Dipanwita Banik", childrenNames: ["Debodhriti Debroy"] },
+    { name: "Dipanwita Banik", type: ["Friend","Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg", spouseName: "Debopom Debroy", childrenNames: ["Debodhriti Debroy"] },
+    { name: "Kamanasish & Debosmita", type: ["Anniversary"], gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
+    { name: "Debodhriti Debroy", type: ["Child"], gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg", parents: ["Debopom Debroy", "Dipanwita Banik"] }
+];
+
+/* normalize */
+people.forEach(p => {
+    if (!Array.isArray(p.type)) p.type = p.type ? [p.type] : [];
+    if (!p.gender) p.gender = 'All';
+    if (!p.childrenNames) p.childrenNames = [];
+    if (!p.parents) p.parents = [];
+});
+
+/* state */
+let currentSort = 'alpha';
+let currentSearch = '';
+let expandedMap = {}; // name -> true/false
+
+/* utilities */
+function fallbackAvatar(name){
+    const initials = (name||'').split(' ').map(s=>s[0]||'').join('').slice(0,2).toUpperCase();
+    return 'https://via.placeholder.com/150?text=' + encodeURIComponent(initials);
+}
+function findPerson(name){ return people.find(p => p.name === name) || null; }
+function escapeId(s){ return (s||'').replace(/[^a-z0-9\-_]/gi, '-'); }
+function escapeJs(s){ return (s||'').replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+
+function getDaysUntil(dateString){
+    if (!dateString || !/^\d{2}-\d{2}$/.test(dateString)) return Infinity;
+    const [mm, dd] = dateString.split('-').map(Number);
+    const today = new Date();
+    const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    let next = new Date(today.getFullYear(), mm-1, dd);
+    if (next < todayMid) next.setFullYear(todayMid.getFullYear() + 1);
+    const diff = Math.ceil((next - todayMid) / (24*60*60*1000));
+    return diff;
+}
+function formatDate(mmdd){
+    if(!mmdd) return '—';
+    const [m,d] = mmdd.split('-').map(Number);
+    const dt = new Date(2000, m-1, d);
+    return dt.toLocaleDateString('en-US', { month:'long', day: 'numeric' });
+}
+
+/* ============================================
+   Rendering: person card + expandable tree area
+   ============================================ */
+
+function personToHTML(person){
+    const parts = (person.date || '').split('-');
+    let dateStr = 'Date not set';
+    if(parts.length === 2){
+        dateStr = formatDate(person.date);
+    }
+    const days = getDaysUntil(person.date);
+    const isToday = days === 0;
+    const countdownText = isToday ? '🎉 TODAY! 🎉' : (days === Infinity ? 'Date not set' : `${days} day${days===1?'':'s'} to go`);
+
+    // tags
+    const tagsHtml = (person.type || []).map(t => `<span class="tag ${t}">${t}</span>`).join('');
+
+    // spouse (display if spouseName present)
+    let spouseHtml = '';
+    if(person.spouseName){
+        spouseHtml = `<div class="spouse-line">Spouse: <button class="spouse-link" onclick="expandAndScroll('${escapeJs(person.spouseName)}')">${person.spouseName}</button></div>`;
+    }
+
+    // child - show parents (if this person is child)
+    let parentsBlock = '';
+    if(person.type.includes('Child')){
+        const parents = (person.parents && person.parents.length) ? person.parents : [];
+        if(parents.length){
+            parentsBlock = `<div class="parents-block"><strong>Parents:</strong> ${parents.map(p => `<button class="parent-link" onclick="expandAndScroll('${escapeJs(p)}')">${p}</button>`).join('')}</div>`;
+        }
+    }
+
+    // expanded tree area (only show when expanded)
+    const isExpanded = !!expandedMap[person.name];
+    const treeContent = isExpanded ? renderTreeForPerson(person) : '';
+    const treeMax = isExpanded ? '1000px' : '0px';
+
+    const genderClass = (person.gender === 'Male' || person.gender === 'Female') ? person.gender : '';
+
+    return `
+        <div class="card ${genderClass}" id="card-${escapeId(person.name)}" data-name="${person.name}">
+            <img class="avatar" src="${person.photo || fallbackAvatar(person.name)}" alt="${person.name}" onerror="this.onerror=null;this.src='${fallbackAvatar(person.name)}'">
+            <div class="name">${person.name}</div>
+            ${tagsHtml}
+            <div class="meta">${dateStr} • <span style="color:var(--text-light)">${countdownText}</span></div>
+            ${spouseHtml}
+            ${parentsBlock}
+            <div style="margin-top:10px">
+                <button class="btn" onclick="toggleExpand('${escapeJs(person.name)}')">${isExpanded ? 'Collapse' : 'Expand'}</button>
+            </div>
+
+            <div class="tree-wrap" id="tree-${escapeId(person.name)}" style="max-height:${treeMax};">
+                ${treeContent}
             </div>
         </div>
+    `;
+}
 
-        <!-- EXISTING CONTROLS -->
-        <select id="genderFilter" onchange="renderCards()" aria-label="Filter by gender">
-            <option value="All">All Genders</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select>
-
-        <select id="categoryFilter" onchange="renderCards()" aria-label="Filter by category">
-            <option value="All">All Categories</option>
-            <option value="Friend">School Friends</option>
-            <option value="Spouse">Spouses</option>
-            <option value="Child">Children</option>
-            <option value="Anniversary">Wedding Anniversaries</option>
-        </select>
-
-        <button onclick="setSort('alpha')" id="btnAlpha" class="active-sort">Sort A-Z</button>
-        <button onclick="setSort('date')" id="btnDate">Sort by Date</button>
-    </div>
-
-    <div class="grid-container" id="cardGrid" aria-live="polite"></div>
-
-    <script>
-        // ---------- DATA ----------
-        const people = [
-            { name: "Kamanasish Bhattacharjee", type: ["Friend"], gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg" },
-            { name: "Debosmita Bhattacharjee", type: ["Spouse"], gender: "Female", date: "02-22", photo: "photos/Debosmita_Bhattacharjee.jpg" },
-            { name: "Debopom Debroy", type: ["Friend","Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg" },
-            { name: "Dipanwita Banik", type: ["Friend","Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg" },
-            { name: "Kamanasish & Debosmita", type: ["Anniversary"], gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
-            { name: "Debodhriti Debroy", type: ["Child"], gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg" }
-        ];
-
-        // Ensure consistent structure
-        people.forEach(p => {
-            if (!Array.isArray(p.type)) p.type = p.type ? [p.type] : [];
-            if (!p.gender) p.gender = 'All';
-        });
-
-        let currentSort = 'alpha';
-        let currentSearch = ''; // search term state
-
-        // ---------- UTILITIES ----------
-        function getZodiac(dayIn, monthIn) {
-            const day = Number(dayIn);
-            const month = Number(monthIn); // 1..12
-            const cutoffs = {
-                1: 19, 2: 18, 3: 20, 4: 19, 5: 20, 6: 20,
-                7: 22, 8: 22, 9: 22, 10: 22, 11: 21, 12: 21
-            };
-            const names = {
-                1: 'Capricorn', 2: 'Aquarius', 3: 'Pisces', 4: 'Aries',
-                5: 'Taurus', 6: 'Gemini', 7: 'Cancer', 8: 'Leo',
-                9: 'Virgo', 10: 'Libra', 11: 'Scorpio', 12: 'Sagittarius'
-            };
-            if (day > (cutoffs[month] || 31)) {
-                let next = month + 1;
-                if (next > 12) next = 1;
-                return names[next];
-            } else {
-                return names[month];
-            }
-        }
-
-        function getDaysUntil(dateString) {
-            if (!dateString || !/^\d{2}-\d{2}$/.test(dateString)) return Infinity;
-            const [mm, dd] = dateString.split('-').map(Number);
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            let next = new Date(currentYear, mm - 1, dd, 0, 0, 0, 0);
-
-            const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
-            if (next < todayMid) {
-                next.setFullYear(currentYear + 1);
-            }
-
-            const oneDay = 24 * 60 * 60 * 1000;
-            const diff = Math.ceil((next - todayMid) / oneDay);
-            return diff;
-        }
-
-        function fallbackAvatar(name) {
-            return 'https://via.placeholder.com/150?text=' + encodeURIComponent(
-                name.split(' ')
-                    .map(word => word[0] || '')
-                    .join('')
-                    .slice(0, 2)
-            );
-        }
-
-        // ---------- SEARCH + AUTOCOMPLETE ----------
-        function handleSearch() {
-            const input = document.getElementById("searchInput").value.trim();
-            currentSearch = input.toLowerCase();
-
-            const box = document.getElementById("autocompleteBox");
-
-            if (input.length === 0) {
-                box.style.display = "none";
-                renderCards();
-                return;
-            }
-
-            const matches = people
-                .filter(p => p.name.toLowerCase().includes(currentSearch))
-                .slice(0, 6);
-
-            if (matches.length === 0) {
-                box.style.display = "none";
-                renderCards();
-                return;
-            }
-
-            box.innerHTML = matches.map(p => `
-                <div onclick="selectSearch('${p.name.replace(/'/g, "\\'")}')" 
-                    style="padding:8px 12px; cursor:pointer; border-bottom:1px solid #f2f2f2;"
-                    onmouseover="this.style.background='#f0f0f0'"
-                    onmouseout="this.style.background='white'">
-                    ${p.name}
+/* render the small family tree for a person */
+function renderTreeForPerson(person){
+    // Friend/Person node
+    const mainNode = `
+        <div class="tree" role="group" aria-label="${person.name} family tree">
+            <div class="node" aria-label="Person">
+                <img class="n-avatar" src="${person.photo || fallbackAvatar(person.name)}" alt="${person.name}" onerror="this.onerror=null;this.src='${fallbackAvatar(person.name)}'">
+                <div>
+                    <div class="n-title">${person.name} <span style="font-size:0.85rem;color:var(--text-light)">${(person.type||[]).join(', ')}</span></div>
+                    <div class="n-sub">Birthday: ${formatDate(person.date)} ${getDaysUntil(person.date)===0? '• Today' : ''}</div>
                 </div>
-            `).join("");
+            </div>
+    `;
 
-            box.style.display = "block";
-            renderCards();
-        }
-
-        function selectSearch(name) {
-            document.getElementById("searchInput").value = name;
-            document.getElementById("autocompleteBox").style.display = "none";
-            currentSearch = name.toLowerCase();
-            renderCards();
-        }
-
-        // Close autocomplete if click outside
-        document.addEventListener('click', (e) => {
-            const box = document.getElementById("autocompleteBox");
-            const input = document.getElementById("searchInput");
-            if (!box.contains(e.target) && e.target !== input) {
-                box.style.display = "none";
-            }
-        });
-
-        // ---------- SORT ----------
-        function setSort(type) {
-            currentSort = type;
-            const btnAlpha = document.getElementById('btnAlpha');
-            const btnDate = document.getElementById('btnDate');
-            btnAlpha.classList.toggle('active-sort', type === 'alpha');
-            btnDate.classList.toggle('active-sort', type === 'date');
-            renderCards();
-        }
-
-        // ---------- RENDERING ----------
-        function personToHTML(person) {
-            const gridDate = person.date || '';
-            const parts = gridDate.split('-');
-            let dateStr = 'Date not set';
-            let zodiac = '';
-            if (parts.length === 2) {
-                const [m, d] = parts.map(Number);
-                const dateObj = new Date(2000, m - 1, d);
-                dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-                zodiac = person.type.includes('Anniversary') ? '❤️' : getZodiac(d, m);
-            }
-
-            const daysLeft = getDaysUntil(person.date);
-            const isToday = daysLeft === 0;
-            const countdownText = isToday
-                ? '🎉 TODAY! 🎉'
-                : (daysLeft === Infinity ? 'Date not set' : `${daysLeft} day${daysLeft === 1 ? '' : 's'} to go`);
-            const countdownStyle = isToday ? 'color:#E91E63;font-weight:700;' : '';
-
-            const tagsHtml = (person.type || [])
-                .map(tag => `<span class="tag ${tag}">${tag}</span>`)
-                .join('');
-
-            const genderClass = (person.gender === 'Male' || person.gender === 'Female') ? person.gender : '';
-            const safePhoto = person.photo || fallbackAvatar(person.name);
-
-            return `
-                <div class="card ${genderClass}">
-                    <img src="${safePhoto}" alt="${person.name}" class="avatar"
-                        onerror="this.onerror=null;this.src='${fallbackAvatar(person.name)}'">
-                    <div class="name">${person.name}</div>
-                    ${tagsHtml}
-                    <div class="date-info">
-                        <span>${dateStr}</span>
-                        <span>${zodiac}</span>
+    // Spouse node (if spouseName known)
+    let spouseBlock = '';
+    if(person.spouseName){
+        const spouse = findPerson(person.spouseName);
+        if(spouse){
+            spouseBlock = `
+                <div style="margin-top:8px">
+                    <div class="node" aria-label="Spouse">
+                        <img class="n-avatar" src="${spouse.photo || fallbackAvatar(spouse.name)}" alt="${spouse.name}" onerror="this.onerror=null;this.src='${fallbackAvatar(spouse.name)}'">
+                        <div>
+                            <div class="n-title">${spouse.name} <span style="font-size:0.85rem;color:var(--text-light)">${(spouse.type||[]).join(', ')}</span></div>
+                            <div class="n-sub">Birthday: ${formatDate(spouse.date)} ${getDaysUntil(spouse.date)===0? '• Today' : ''}</div>
+                        </div>
                     </div>
-                    <div class="countdown" style="${countdownStyle}">
-                        ${countdownText}
+                </div>
+            `;
+        } else {
+            spouseBlock = `
+                <div style="margin-top:8px">
+                    <div class="node" aria-label="Spouse">
+                        <div style="width:48px;height:48px;border-radius:50%;background:#f5f5f5;margin-right:12px;display:inline-block"></div>
+                        <div>
+                            <div class="n-title">${person.spouseName}</div>
+                            <div class="n-sub">Spouse (details not available)</div>
+                        </div>
                     </div>
                 </div>
             `;
         }
+    }
 
-        function renderCards() {
-            const grid = document.getElementById('cardGrid');
-            const genderFilter = document.getElementById('genderFilter').value;
-            const categoryFilter = document.getElementById('categoryFilter').value;
+    // Children: try person.childrenNames, else find children with this person in parents list
+    let children = [];
+    if(Array.isArray(person.childrenNames) && person.childrenNames.length){
+        children = person.childrenNames.map(n => findPerson(n) || { name:n, type:['Child'] });
+    } else {
+        children = people.filter(p => Array.isArray(p.parents) && p.parents.includes(person.name) && p.type.includes('Child'));
+    }
 
-            let filtered = people.filter(person => {
-                const gMatch =
-                    genderFilter === 'All' ||
-                    person.gender === 'All' ||
-                    person.gender === genderFilter ||
-                    person.type.includes('Anniversary');
+    let childrenHtml = '';
+    if(children.length){
+        childrenHtml = `<div class="children">`;
+        children.forEach(child => {
+            const parents = (child.parents && child.parents.length) ? child.parents : [];
+            childrenHtml += `
+                <div class="node" aria-label="Child">
+                    <img class="n-avatar" src="${child.photo || fallbackAvatar(child.name)}" alt="${child.name}" onerror="this.onerror=null;this.src='${fallbackAvatar(child.name)}'">
+                    <div>
+                        <div class="n-title">${child.name} <span style="font-size:0.85rem;color:var(--text-light)">${(child.type||[]).join(', ')}</span></div>
+                        <div class="n-sub">Birthday: ${formatDate(child.date)} ${getDaysUntil(child.date)===0? '• Today' : ''}</div>
+                        ${parents.length ? `<div class="parents-block"><strong>Parents:</strong> ${parents.map(p=>` <button class="parent-link" onclick="expandAndScroll('${escapeJs(p)}')">${p}</button>`).join('')}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        childrenHtml += `</div>`;
+    }
 
-                const cMatch =
-                    categoryFilter === 'All' ||
-                    person.type.includes(categoryFilter);
+    return mainNode + spouseBlock + childrenHtml + `</div>`;
+}
 
-                const sMatch =
-                    !currentSearch ||
-                    person.name.toLowerCase().includes(currentSearch);
+/* render all cards based on filters/search */
+function renderCards(){
+    const grid = document.getElementById('cardGrid');
+    const genderFilter = document.getElementById('genderFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
 
-                return gMatch && cMatch && sMatch;
-            });
+    let filtered = people.filter(person => {
+        const gMatch = genderFilter === 'All' || person.gender === 'All' || person.gender === genderFilter || person.type.includes('Anniversary');
+        const cMatch = categoryFilter === 'All' || person.type.includes(categoryFilter);
+        const sMatch = !currentSearch || person.name.toLowerCase().includes(currentSearch.toLowerCase());
+        return gMatch && cMatch && sMatch;
+    });
 
-            if (currentSort === 'alpha') {
-                filtered.sort((a, b) => a.name.localeCompare(b.name));
-            } else {
-                filtered.sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date));
+    if(currentSort === 'alpha'){
+        filtered.sort((a,b) => a.name.localeCompare(b.name));
+    } else {
+        filtered.sort((a,b) => getDaysUntil(a.date) - getDaysUntil(b.date));
+    }
+
+    grid.innerHTML = filtered.length ? filtered.map(personToHTML).join('') : `<div style="grid-column:1/-1;text-align:center;color:var(--text-light)">No entries</div>`;
+
+    // After render, if any expanded card needs its tree max-height set, set it for better animation
+    setTimeout(()=> {
+        Object.keys(expandedMap).forEach(name => {
+            const el = document.getElementById('tree-' + escapeId(name));
+            if(el){
+                el.style.maxHeight = expandedMap[name] ? (el.scrollHeight + 30) + 'px' : '0px';
             }
+        });
+    }, 60);
+}
 
-            grid.innerHTML = filtered.length
-                ? filtered.map(personToHTML).join('')
-                : "<div style='grid-column:1/-1;text-align:center;color:var(--text-light)'>No entries found</div>";
+/* toggle expand for name */
+function toggleExpand(name){
+    expandedMap[name] = !expandedMap[name];
+    renderCards();
+    // scroll into view
+    setTimeout(()=> {
+        const el = document.getElementById('card-' + escapeId(name));
+        if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); }
+    }, 120);
+}
+
+/* expand target name and scroll (used by spouse and parent links) */
+function expandAndScroll(name){
+    // ensure map shows expanded
+    expandedMap[name] = true;
+    // collapse others? keep as-is (we'll keep any existing expanded)
+    renderCards();
+    // after render, scroll and ensure tree opens fully
+    setTimeout(()=> {
+        const el = document.getElementById('card-' + escapeId(name));
+        const tree = document.getElementById('tree-' + escapeId(name));
+        if(tree){
+            tree.style.maxHeight = (tree.scrollHeight + 30) + 'px';
         }
+        if(el){
+            el.scrollIntoView({behavior:'smooth', block:'center'});
+            // subtle highlight
+            el.style.transition = 'box-shadow .3s';
+            el.style.boxShadow = '0 0 0 4px rgba(108,99,255,0.08)';
+            setTimeout(()=> el.style.boxShadow = '', 1400);
+        }
+    }, 140);
+}
 
-        // initial render
-        renderCards();
-    </script>
+/* search and sort functions */
+function handleSearch(){ currentSearch = document.getElementById('searchInput').value || ''; renderCards(); }
+function setSort(type){ currentSort = type; document.getElementById('btnAlpha').classList.toggle('active-sort', type==='alpha'); document.getElementById('btnDate').classList.toggle('active-sort', type==='date'); renderCards(); }
+
+/* initial render */
+renderCards();
+
+/* expose for debugging */
+window._CIRCLE = { people, renderCards, expandAndScroll, toggleExpand };
+</script>
 
 </body>
 </html>
