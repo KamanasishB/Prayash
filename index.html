@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Circle | Special Days</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --bg: #F0F2F5;
+            --card-bg: #FFFFFF;
+            --text-main: #2D3436;
+            --text-light: #636E72;
+            --male-color: #e3f2fd;
+            --female-color: #fce4ec;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 20px;
+        }
+
+        /* Header Section */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        h1 { font-weight: 600; color: var(--text-main); margin-bottom: 10px; }
+        p { color: var(--text-light); }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        select, button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            background: white;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        button:hover, select:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .active-sort {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Card Design */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        /* Gender indicator stripe */
+        .card.Male { border-bottom: 4px solid #2196F3; }
+        .card.Female { border-bottom: 4px solid #E91E63; }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .name { font-size: 1.2rem; font-weight: 600; margin-bottom: 5px; }
+        
+        .tag {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 12px;
+            background: #eee;
+            color: #555;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .date-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .countdown {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+
+        /* Type specific styling */
+        .tag.Alumni { background-color: #e8f5e9; color: #2e7d32; }
+        .tag.Spouse { background-color: #fff3e0; color: #ef6c00; }
+        .tag.Child { background-color: #f3e5f5; color: #7b1fa2; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Our Circle</h1>
+        <p>Celebrating the milestones of our school group & families.</p>
+    </header>
+
+    <div class="controls">
+        <select id="genderFilter" onchange="renderCards()">
+            <option value="All">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <select id="categoryFilter" onchange="renderCards()">
+            <option value="All">All Categories</option>
+            <option value="Alumni">School Friends</option>
+            <option value="Spouse">Spouses</option>
+            <option value="Child">Children</option>
+            <option value="Anniversary">Wedding Anniversaries</option>
+        </select>
+
+        <button onclick="setSort('alpha')" id="btnAlpha" class="active-sort">Sort A-Z</button>
+        <button onclick="setSort('date')" id="btnDate">Sort by Date</button>
+    </div>
+
+    <div class="grid-container" id="cardGrid">
+        </div>
+
+    <script>
+        // --- 1. THE DATA ---
+        // Edit this list to add your real friends!
+        // Format: MM-DD for dates.
+        const people = [
+            { name: "Arjun Mehta", type: "Alumni", gender: "Male", date: "05-15", photo: "https://i.pravatar.cc/150?img=11" },
+            { name: "Priya Mehta", type: "Spouse", gender: "Female", date: "08-22", photo: "https://i.pravatar.cc/150?img=5" },
+            { name: "Rohan Mehta", type: "Child", gender: "Male", date: "12-10", photo: "https://i.pravatar.cc/150?img=13" },
+            { name: "Sarah Jenkins", type: "Alumni", gender: "Female", date: "02-14", photo: "https://i.pravatar.cc/150?img=9" },
+            { name: "Mike Ross", type: "Alumni", gender: "Male", date: "11-05", photo: "https://i.pravatar.cc/150?img=3" },
+            { name: "Arjun & Priya", type: "Anniversary", gender: "All", date: "06-20", photo: "https://images.unsplash.com/photo-1522673607200-1645062cd26c?auto=format&fit=crop&w=150&q=80" },
+            { name: "Ananya Gupta", type: "Child", gender: "Female", date: "01-10", photo: "https://i.pravatar.cc/150?img=32" },
+        ];
+
+        let currentSort = 'alpha';
+
+        // --- 2. LOGIC FUNCTIONS ---
+
+        function getZodiac(day, month) {
+            const zodiac =['','Capricorn','Aquarius','Pisces','Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn'];
+            const last_day =['',19,18,20,19,20,20,22,22,22,22,21,21,19];
+            return (day > last_day[month]) ? zodiac[month*1 + 1] : zodiac[month];
+        }
+
+        function getDaysUntil(dateString) {
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const [month, day] = dateString.split('-').map(Number);
+            let nextDate = new Date(currentYear, month - 1, day);
+
+            if (today > nextDate) {
+                nextDate.setFullYear(currentYear + 1);
+            }
+            
+            const oneDay = 24 * 60 * 60 * 1000;
+            const diffDays = Math.round(Math.abs((nextDate - today) / oneDay));
+            return diffDays;
+        }
+
+        function setSort(type) {
+            currentSort = type;
+            document.getElementById('btnAlpha').className = type === 'alpha' ? 'active-sort' : '';
+            document.getElementById('btnDate').className = type === 'date' ? 'active-sort' : '';
+            renderCards();
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardGrid');
+            const genderFilter = document.getElementById('genderFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            // 1. Filter
+            let filtered = people.filter(person => {
+                const gMatch = genderFilter === "All" || person.gender === genderFilter || person.type === "Anniversary";
+                const cMatch = categoryFilter === "All" || person.type === categoryFilter;
+                return gMatch && cMatch;
+            });
+
+            // 2. Sort
+            if (currentSort === 'alpha') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else {
+                filtered.sort((a, b) => getDaysUntil(a.date) - getDaysUntil(b.date));
+            }
+
+            // 3. Render
+            grid.innerHTML = filtered.map(person => {
+                const [m, d] = person.date.split('-');
+                const dateObj = new Date(2000, m-1, d); // Dummy year for formatting
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+                const daysLeft = getDaysUntil(person.date);
+                const zodiac = person.type === 'Anniversary' ? '❤️' : getZodiac(d, m);
+                const isToday = daysLeft === 0;
+
+                return `
+                    <div class="card ${person.gender}">
+                        <img src="${person.photo}" alt="${person.name}" class="avatar">
+                        <div class="name">${person.name}</div>
+                        <span class="tag ${person.type}">${person.type}</span>
+                        
+                        <div class="date-info">
+                            <span>${dateStr}</span>
+                            <span>${zodiac}</span>
+                        </div>
+                        
+                        <div class="countdown" style="color: ${isToday ? '#E91E63' : 'inherit'}; font-weight: ${isToday ? 'bold' : 'normal'}">
+                            ${isToday ? "🎉 TODAY! 🎉" : `${daysLeft} days to go`}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initial Render
+        renderCards();
+
+    </script>
+</body>
+</html>
