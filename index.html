@@ -94,28 +94,36 @@
         margin: 6px auto 12px;
         background: linear-gradient(90deg,#fff,#fbfbff);
         border-radius:12px;
-        padding:14px 18px;
+        padding:18px;
         display:flex;
         align-items:center;
-        justify-content:space-between;
+        justify-content:center;
         gap:12px;
         box-shadow: 0 8px 30px rgba(60,60,120,0.06);
+        position: relative; /* needed for absolute confetti */
+        text-align: center;  /* center text inside */
     }
     .upcoming .msg {
         font-weight:600;
         font-size:1rem;
         color:var(--text-main);
+        text-align: center;
     }
     .upcoming .date {
         color:var(--text-light);
         font-weight:600;
+        text-align: center;
     }
     /* confetti container */
     .confetti {
-        position:relative;
-        width:120px;
-        height:44px;
-        overflow:visible;
+        position: absolute;
+        top: -18px;               /* above the box's top edge — tweak if needed */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 220px;             /* widen the confetti spread */
+        height: 48px;             /* space for falling pieces */
+        pointer-events: none;     /* so it doesn't block clicks */
+        overflow: visible;
     }
     .confetti span {
         position:absolute;
@@ -126,8 +134,9 @@
         opacity:0.95;
         transform: translateY(0) rotateZ(0);
         animation-name: confettiFall;
-        animation-iteration-count: 1;
+        animation-iteration-count: infinite;     /* run continuously */
         animation-timing-function: cubic-bezier(.2,.9,.3,1);
+        animation-fill-mode: both; 
     }
     @keyframes confettiFall {
         0% { transform: translateY(-8px) rotateZ(0) scale(1); opacity:1 }
@@ -407,9 +416,18 @@ function renderCards(){
 
 /* toggle expand for name */
 function toggleExpand(name){
-    expandedMap[name] = !expandedMap[name];
+    // If the clicked card is already expanded, collapse it.
+    if (expandedMap[name]) {
+        expandedMap[name] = false;
+    } else {
+        // Collapse all others, then expand this one
+        Object.keys(expandedMap).forEach(k => expandedMap[k] = false);
+        expandedMap[name] = true;
+    }
+
     renderCards();
-    // scroll into view
+
+    // scroll into view for the newly-expanded card
     setTimeout(()=> {
         const el = document.getElementById('card-' + escapeId(name));
         if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); }
@@ -418,6 +436,7 @@ function toggleExpand(name){
 
 /* expand target name and scroll (used by spouse and parent links) */
 function expandAndScroll(name){
+    Object.keys(expandedMap).forEach(k => expandedMap[k] = false);
     expandedMap[name] = true;
     renderCards();
     setTimeout(()=> {
@@ -494,8 +513,8 @@ function createConfetti(container) {
         s.style.height = size + 'px';
         s.style.background = colors[Math.floor(Math.random() * colors.length)];
         // randomize animation duration & delay
-        const dur = 900 + Math.round(Math.random() * 900);
-        const delay = Math.round(Math.random() * 300);
+        const dur = 1400 + Math.round(Math.random() * 800); // longer duration for smooth loop
+        const delay = Math.round(Math.random() * 1400);     // stagger start times across duration
         s.style.animationDuration = dur + 'ms';
         s.style.animationDelay = delay + 'ms';
         container.appendChild(s);
