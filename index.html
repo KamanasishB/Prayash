@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Prayash | Special Days — Interactive</title>
+<title>Our Circle | Special Days — Interactive</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
     :root {
@@ -12,16 +12,52 @@
         --card-bg: #FFFFFF;
         --text-main: #2D3436;
         --text-light: #636E72;
+        --control-bg: #ffffff;
     }
     *{box-sizing:border-box}
     body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text-main);padding:20px}
     header{text-align:center;margin-bottom:24px}
     h1{margin:0;font-weight:600}
     p{color:var(--text-light);margin:6px 0 0}
-    .controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
-    .search{padding:10px 14px;border-radius:999px;border:1px solid #ddd;background:white;min-width:220px}
-    .btn{padding:10px 14px;border-radius:999px;border:1px solid #ddd;background:white;cursor:pointer}
-    .grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:25px;max-width:1200px;margin:0 auto}
+    .controls{
+        display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;
+        position:relative;
+    }
+
+    /* Rounded, borderless selects like sort buttons */
+    select, .search {
+        padding:10px 14px;
+        border-radius:999px;
+        border: none; /* removed border */
+        background: var(--control-bg);
+        box-shadow: 0 6px 18px rgba(15,15,15,0.05);
+        font-family: inherit;
+        cursor: pointer;
+        outline: none;
+    }
+
+    /* keep hover micro lift like buttons */
+    select:hover, .search:hover { transform: translateY(-2px); transition: transform .12s ease; }
+
+    /* Sort buttons styling (round, no border) */
+    .btn {
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: none; /* removed border */
+        background: var(--control-bg);
+        box-shadow: 0 6px 18px rgba(15,15,15,0.05);
+        cursor:pointer;
+        font-weight:600;
+        color:var(--text-main);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn.active-sort {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 8px 26px rgba(108,99,255,0.14);
+    }
+
+    .grid-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:25px;max-width:1200px;margin:14px auto}
     .card{background:var(--card-bg);border-radius:18px;padding:20px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.06);position:relative;overflow:visible;transition:transform .18s}
     .card:hover{transform:translateY(-6px)}
     .card.Male{border-bottom:4px solid #2196F3}
@@ -40,7 +76,6 @@
     .spouse-link{color:var(--primary);cursor:pointer;text-decoration:underline;background:transparent;border:none;padding:0;font-weight:600}
     .parents-block{margin-top:10px;font-size:0.88rem;color:var(--text-light);background:#fafafa;padding:8px;border-radius:8px;border:1px solid #f0f0f0}
     .parents-block .parent-link{color:var(--primary);cursor:pointer;text-decoration:underline;font-weight:600;margin-left:8px}
-    /* tree details */
     .tree-wrap{max-height:0;overflow:hidden;transition:max-height .36s cubic-bezier(.2,.9,.3,1);margin-top:12px}
     .tree{padding-left:12px;position:relative}
     .tree::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#eee;border-radius:2px}
@@ -52,22 +87,71 @@
     .children{padding-left:24px;margin-top:-6px}
     .badge{font-size:0.75rem;padding:4px 8px;border-radius:999px;background:#f3f3ff;color:var(--primary);display:inline-block;margin-left:8px}
     @media (max-width:560px){.avatar{width:80px;height:80px}.n-avatar{width:40px;height:40px}}
+
+    /* Upcoming event section */
+    .upcoming {
+        max-width:1200px;
+        margin: 6px auto 12px;
+        background: linear-gradient(90deg,#fff,#fbfbff);
+        border-radius:12px;
+        padding:14px 18px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        box-shadow: 0 8px 30px rgba(60,60,120,0.06);
+    }
+    .upcoming .msg {
+        font-weight:600;
+        font-size:1rem;
+        color:var(--text-main);
+    }
+    .upcoming .date {
+        color:var(--text-light);
+        font-weight:600;
+    }
+    /* confetti container */
+    .confetti {
+        position:relative;
+        width:120px;
+        height:44px;
+        overflow:visible;
+    }
+    .confetti span {
+        position:absolute;
+        top: -8px;
+        width:10px;
+        height:10px;
+        border-radius:2px;
+        opacity:0.95;
+        transform: translateY(0) rotateZ(0);
+        animation-name: confettiFall;
+        animation-iteration-count: 1;
+        animation-timing-function: cubic-bezier(.2,.9,.3,1);
+    }
+    @keyframes confettiFall {
+        0% { transform: translateY(-8px) rotateZ(0) scale(1); opacity:1 }
+        80% { opacity:1 }
+        100% { transform: translateY(110px) rotateZ(360deg) scale(0.95); opacity:0 }
+    }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Prayash | Special Days</h1>
+    <h1>Our Circle | Special Days</h1>
     <p>Click spouse/parent names to jump & expand their card</p>
 </header>
 
 <div class="controls">
-    <input id="searchInput" class="search" placeholder="Search name..." oninput="handleSearch()" autocomplete="off">
+    <input id="searchInput" class="search" placeholder="Search name..." oninput="handleSearch()" autocomplete="off" aria-label="Search">
+
     <select id="genderFilter" onchange="renderCards()" aria-label="Filter by gender">
         <option value="All">All</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
     </select>
+
     <select id="categoryFilter" onchange="renderCards()" aria-label="Filter by category">
         <option value="All">All Categories</option>
         <option value="Friend">Friends</option>
@@ -75,15 +159,25 @@
         <option value="Child">Children</option>
         <option value="Anniversary">Anniversaries</option>
     </select>
-    <button onclick="setSort('alpha')" id="btnAlpha" class="btn active-sort">Sort A-Z</button>
+
+    <button onclick="setSort('alpha')" id="btnAlpha" class="btn">Sort A-Z</button>
     <button onclick="setSort('date')" id="btnDate" class="btn">Sort by Date</button>
+</div>
+
+<!-- Upcoming event with confetti -->
+<div id="upcomingSection" class="upcoming" aria-live="polite" style="display:none">
+    <div>
+        <div class="msg" id="upcomingMsg">Wish X on Y Date</div>
+        <div class="date" id="upcomingDate">Date</div>
+    </div>
+    <div class="confetti" id="confetti"></div>
 </div>
 
 <div class="grid-container" id="cardGrid" aria-live="polite"></div>
 
 <script>
 /* ====================
-   Data (start from your given dataset; I added spouseName and parents where needed)
+   Data (start)
    ==================== */
 const people = [
     { name: "Kamanasish Bhattacharjee", type: ["Friend"], gender: "Male", date: "11-08", photo: "photos/Kamanasish_Bhattacharjee.jpeg", spouseName: "Debosmita Bhattacharjee" },
@@ -91,16 +185,12 @@ const people = [
     { name: "Kamanasish & Debosmita", type: ["Anniversary"], gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
     { name: "Debopom Debroy", type: ["Friend","Spouse"], gender: "Male", date: "04-08", photo: "photos/Debopom_Debroy.jpg", spouseName: "Dipanwita Banik", childrenNames: ["Debodhriti Debroy"] },
     { name: "Dipanwita Banik", type: ["Friend","Spouse"], gender: "Female", date: "11-06", photo: "photos/Dipanwita_Banik.jpg", spouseName: "Debopom Debroy", childrenNames: ["Debodhriti Debroy"] },
-    { name: "Debopom & Dipanwita", type: ["Anniversary"], gender: "All", date: "02-01", photo: "photos/Debopom_Dipanwita.jpg" },
+    { name: "Kamanasish & Debosmita", type: ["Anniversary"], gender: "All", date: "11-19", photo: "photos/Kamanasish_Debosmita.jpg" },
     { name: "Debodhriti Debroy", type: ["Child"], gender: "Female", date: "04-29", photo: "photos/Debodhriti_Debroy.jpg", parents: ["Debopom Debroy", "Dipanwita Banik"] },
     { name: "Sourav Paul", type: ["Friend","Spouse"], gender: "Male", date: "02-17", photo: "photos/Sourav_Paul.jpg", spouseName: "Sougata Paul", childrenNames: ["Anumegha Paul"] },
     { name: "Sougata Paul", type: ["Friend","Spouse"], gender: "Female", date: "03-18", photo: "photos/Sougata_Paul.jpg", spouseName: "Sourav Paul", childrenNames: ["Anumegha Paul"] },
     { name: "Sourav & Sougata", type: ["Anniversary"], gender: "All", date: "02-01", photo: "photos/Sourav_Sougata.jpg" },
-    { name: "Anumegha Paul", type: ["Child"], gender: "Female", date: "03-06", photo: "photos/Anumegha_Paul.jpg", parents: ["Sourav Paul", "Sougata Paul"] },
-    { name: "Ashim Debnath", type: ["Friend","Spouse"], gender: "Male", date: "01-23", photo: "photos/Ashim_Debnath.jpg", spouseName: "Swarupa Nath", childrenNames: ["Ahili Debnath"] },
-    { name: "Swarupa Nath", type: ["Spouse"], gender: "Female", date: "02-20", photo: "photos/Swarupa_Nath.jpg", spouseName: "Ashim Debnath", childrenNames: ["Ahili Debnath"] },
-    { name: "Ashim & Swarupa", type: ["Anniversary"], gender: "All", date: "11-21", photo: "photos/Ashim_Swarupa.jpg" },
-    { name: "Ahili Debnath", type: ["Child"], gender: "Female", date: "01-09", photo: "photos/Ahili_Debnath.jpg", parents: ["Ashim Debnath", "Swarupa Nath"] }
+    { name: "Anumegha Paul", type: ["Child"], gender: "Female", date: "03-06", photo: "photos/Anumegha_Paul.jpg", parents: ["Sourav Paul", "Sougata Paul"] }
 ];
 
 /* normalize */
@@ -112,7 +202,7 @@ people.forEach(p => {
 });
 
 /* state */
-let currentSort = 'alpha';
+let currentSort = 'date';    // <-- default sort by date now
 let currentSearch = '';
 let expandedMap = {}; // name -> true/false
 
@@ -296,7 +386,7 @@ function renderCards(){
 
     grid.innerHTML = filtered.length ? filtered.map(personToHTML).join('') : `<div style="grid-column:1/-1;text-align:center;color:var(--text-light)">No entries</div>`;
 
-    // After render, if any expanded card needs its tree max-height set, set it for better animation
+    // After render, ensure opened trees animate correctly
     setTimeout(()=> {
         Object.keys(expandedMap).forEach(name => {
             const el = document.getElementById('tree-' + escapeId(name));
@@ -305,6 +395,9 @@ function renderCards(){
             }
         });
     }, 60);
+
+    // update upcoming event section
+    updateUpcoming();
 }
 
 /* toggle expand for name */
@@ -320,11 +413,8 @@ function toggleExpand(name){
 
 /* expand target name and scroll (used by spouse and parent links) */
 function expandAndScroll(name){
-    // ensure map shows expanded
     expandedMap[name] = true;
-    // collapse others? keep as-is (we'll keep any existing expanded)
     renderCards();
-    // after render, scroll and ensure tree opens fully
     setTimeout(()=> {
         const el = document.getElementById('card-' + escapeId(name));
         const tree = document.getElementById('tree-' + escapeId(name));
@@ -333,7 +423,6 @@ function expandAndScroll(name){
         }
         if(el){
             el.scrollIntoView({behavior:'smooth', block:'center'});
-            // subtle highlight
             el.style.transition = 'box-shadow .3s';
             el.style.boxShadow = '0 0 0 4px rgba(108,99,255,0.08)';
             setTimeout(()=> el.style.boxShadow = '', 1400);
@@ -345,11 +434,80 @@ function expandAndScroll(name){
 function handleSearch(){ currentSearch = document.getElementById('searchInput').value || ''; renderCards(); }
 function setSort(type){ currentSort = type; document.getElementById('btnAlpha').classList.toggle('active-sort', type==='alpha'); document.getElementById('btnDate').classList.toggle('active-sort', type==='date'); renderCards(); }
 
-/* initial render */
-renderCards();
+/* =========================
+   Upcoming event logic + confetti
+   ========================= */
 
-/* expose for debugging */
-window._CIRCLE = { people, renderCards, expandAndScroll, toggleExpand };
+function getNextEvent() {
+    // consider both birthday-like dates (for people) and Anniversary entries in people array
+    let best = null;
+    people.forEach(p => {
+        if (!p.date) return;
+        const days = getDaysUntil(p.date);
+        if (days === Infinity) return;
+        if (best === null || days < best.days) {
+            best = { person: p, days };
+        }
+    });
+    return best; // { person, days } or null
+}
+
+function updateUpcoming() {
+    const container = document.getElementById('upcomingSection');
+    const msgEl = document.getElementById('upcomingMsg');
+    const dateEl = document.getElementById('upcomingDate');
+    const confettiEl = document.getElementById('confetti');
+
+    const next = getNextEvent();
+    if (!next) {
+        container.style.display = 'none';
+        confettiEl.innerHTML = '';
+        return;
+    }
+
+    const p = next.person;
+    const dateStr = formatDate(p.date);
+    // show "Wish X on Y Date" — for anniversaries, the name may be combined (like "A & B")
+    msgEl.textContent = `Wish ${p.name} on ${dateStr}`;
+    dateEl.textContent = (next.days === 0) ? 'Today' : `${next.days} day${next.days===1?'':'s'} left`;
+
+    container.style.display = 'flex';
+    // create confetti once per update (clears previous)
+    createConfetti(confettiEl);
+}
+
+function createConfetti(container) {
+    container.innerHTML = '';
+    const colors = ['#FF4D4F','#FFB64D','#FFD84D','#6C63FF','#4DD0E1','#D1FF86'];
+    const count = 14;
+    for (let i=0; i<count; i++){
+        const s = document.createElement('span');
+        const left = Math.round((i / (count - 1)) * 100); // 0..100%
+        const size = 6 + Math.round(Math.random() * 8);
+        s.style.left = left + '%';
+        s.style.width = size + 'px';
+        s.style.height = size + 'px';
+        s.style.background = colors[Math.floor(Math.random() * colors.length)];
+        // randomize animation duration & delay
+        const dur = 900 + Math.round(Math.random() * 900);
+        const delay = Math.round(Math.random() * 300);
+        s.style.animationDuration = dur + 'ms';
+        s.style.animationDelay = delay + 'ms';
+        container.appendChild(s);
+    }
+}
+
+/* initial render */
+document.addEventListener('DOMContentLoaded', () => {
+    // set initial active sort button state (date as default)
+    document.getElementById('btnAlpha').classList.toggle('active-sort', currentSort === 'alpha');
+    document.getElementById('btnDate').classList.toggle('active-sort', currentSort === 'date');
+
+    renderCards();
+});
+
+// expose for debugging
+window._CIRCLE = { people, renderCards, expandAndScroll, toggleExpand, updateUpcoming };
 </script>
 
 </body>
